@@ -2,7 +2,6 @@ import { parse } from 'https://deno.land/std/flags/mod.ts'
 
 const urlLists = (boardId: string) => `https://trello.com/1/boards/${boardId}/lists`
 const urlCards = (listId: string) => `https://trello.com/1/lists/${listId}/cards`
-const decoder = new TextDecoder();
 
 const args = parse(Deno.args)
 if (!(args.i && args.n && args.k && args.t)) {
@@ -14,16 +13,16 @@ const key = args.k
 const token = args.t
 
 const res = await fetch(`${urlLists(boardId)}?key=${key}&token=${token}&fields=name`)
-const body = new Uint8Array(await res.arrayBuffer());
-const lists = JSON.parse(decoder.decode(body));
+const json = res.json()
+const lists = await json;
 
 const boardName = args.n
 const list = lists.find((l: { id: string, name: string }) => l.name === boardName)
 
 if (list) {
   const res = await fetch(`${urlCards(list.id)}?key=${key}&token=${token}&fields=name`)
-  const body = new Uint8Array(await res.arrayBuffer());
-  const cards = JSON.parse(decoder.decode(body));
+  const json = res.json()
+  const cards = await json;
 
   console.log(cards)
 } else {
